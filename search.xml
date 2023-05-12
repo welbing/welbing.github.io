@@ -4,6 +4,25 @@
   
     
     <entry>
+      <title>第一篇博客</title>
+      <link href="/2023/05/13/%E7%AC%AC%E4%B8%80%E7%AF%87%E5%8D%9A%E5%AE%A2/"/>
+      <url>/2023/05/13/%E7%AC%AC%E4%B8%80%E7%AF%87%E5%8D%9A%E5%AE%A2/</url>
+      
+        <content type="html"><![CDATA[]]></content>
+      
+      
+      
+        <tags>
+            
+            <tag> 本来想让这个博客早点和大家见面，没想到调试过程中出现太多的错误，调试了近一周才完成了这个博客，不过也算完成了，导航栏中部分页面还没开同后续会继续开通。 </tag>
+            
+        </tags>
+      
+    </entry>
+    
+    
+    
+    <entry>
       <title>Hello World</title>
       <link href="/2023/05/10/hello-world/"/>
       <url>/2023/05/10/hello-world/</url>
