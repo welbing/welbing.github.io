@@ -1,0 +1,173 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Welbing Journal Studio</title>
+    <link rel="icon" href="/img/favicon.png" />
+    <link rel="stylesheet" href="/css/theme-polish.css" />
+  </head>
+  <body class="editor-shell">
+    <div id="editor-root"></div>
+    <script type="module">
+      import React, { useEffect, useMemo, useState } from "https://esm.sh/react@18.3.1";
+      import { createRoot } from "https://esm.sh/react-dom@18.3.1/client";
+      import htm from "https://esm.sh/htm@3.1.1";
+      import { prepare, layoutWithLines } from "https://esm.sh/@chenglou/pretext@latest";
+
+      const html = htm.bind(React.createElement);
+
+      const initialState = {
+        title: "鎶婂崥瀹㈠仛鎴愪細鍛煎惛鐨勪釜浜哄垔鐗?,
+        subtitle: "杩欓噷鍙互棰勬紨棣栭〉鏂囨銆侀厤鑹插拰鍏憡鍐呭锛屽啀鎶婄粨鏋滆创鍥為潤鎬佺珯閲屻€?,
+        announcement: "娆㈣繋鏉ュ埌 Welbing Journal銆傝繖閲屾鍦ㄤ粠鏃фā鏉匡紝鎱㈡參鍗囩骇鎴愭洿鑰愮湅鐨勪釜浜哄崥瀹€?,
+        accent: "#f06b4f",
+        secondary: "#3ba99c",
+        chips: "Pretext, React Studio, Live2D, Motion",
+        width: 560,
+      };
+
+      function App() {
+        const [state, setState] = useState(() => {
+          const stored = window.localStorage.getItem("welbing-studio");
+          return stored ? { ...initialState, ...JSON.parse(stored) } : initialState;
+        });
+
+        useEffect(() => {
+          window.localStorage.setItem("welbing-studio", JSON.stringify(state));
+        }, [state]);
+
+        const titleMetrics = useMemo(() => {
+          const prepared = prepare(state.title, '52px "Noto Serif SC"');
+          return layoutWithLines(prepared, Number(state.width), 60);
+        }, [state.title, state.width]);
+
+        const metricLines = Array.isArray(titleMetrics.lines) ? titleMetrics.lines : [];
+        const metricHeight = titleMetrics.height || 0;
+        const metricCount = metricLines.length || Number(titleMetrics.lines || 0);
+        const metricFirstLine =
+          typeof metricLines[0] === "string"
+            ? metricLines[0]
+            : metricLines[0]?.text || "鏆傛棤";
+
+        const chips = state.chips
+          .split(",")
+          .map((item) => item.trim())
+          .filter(Boolean);
+
+        const exportBlock = `{
+  "title": "${state.title}",
+  "subtitle": "${state.subtitle}",
+  "announcement": "${state.announcement}",
+  "accent": "${state.accent}",
+  "secondary": "${state.secondary}",
+  "chips": ${JSON.stringify(chips, null, 2)},
+  "pretext": {
+    "width": ${Number(state.width)},
+    "height": ${metricHeight},
+    "lines": ${metricCount}
+  }
+}`;
+
+        const update = (key) => (event) => {
+          setState((current) => ({ ...current, [key]: event.target.value }));
+        };
+
+        return html`
+          <div className="editor-shell__wrap">
+            <header className="editor-shell__header">
+              <div>
+                <div className="editor-shell__eyebrow">React + Pretext Studio</div>
+                <h1>鍗氬鍙鍖栫紪杈戝彴</h1>
+                <p className="hero-showcase__lead">
+                  杩欎釜椤甸潰涓嶆槸鐩存帴鏀圭嚎涓婂唴瀹癸紝鑰屾槸甯姪浣犲厛鎶婃爣棰樸€佹憳瑕併€佸叕鍛婂拰涓婚鑹茶皟鍒版弧鎰忥紝鍐嶅洖濉埌鍗氬闈欐€侀〉銆?                </p>
+              </div>
+              <a className="hero-button hero-button--primary" href="/">杩斿洖鍗氬棣栭〉</a>
+            </header>
+
+            <section className="editor-shell__grid">
+              <aside className="editor-card">
+                <div className="editor-group">
+                  <label>棣栭〉澶ф爣棰?/label>
+                  <input value=${state.title} onInput=${update("title")} />
+                </div>
+                <div className="editor-group">
+                  <label>鍓爣棰?/ 寮曞鏂囨</label>
+                  <textarea value=${state.subtitle} onInput=${update("subtitle")}></textarea>
+                </div>
+                <div className="editor-group">
+                  <label>绔欑偣鍏憡</label>
+                  <textarea value=${state.announcement} onInput=${update("announcement")}></textarea>
+                </div>
+                <div className="editor-group">
+                  <label>鏍囩鍏抽敭璇嶏紙閫楀彿鍒嗛殧锛?/label>
+                  <input value=${state.chips} onInput=${update("chips")} />
+                </div>
+                <div className="editor-group">
+                  <label>涓昏壊</label>
+                  <input type="color" value=${state.accent} onInput=${update("accent")} />
+                </div>
+                <div className="editor-group">
+                  <label>杈呭姪鑹?/label>
+                  <input type="color" value=${state.secondary} onInput=${update("secondary")} />
+                </div>
+                <div className="editor-group">
+                  <label>Pretext 璁＄畻瀹藉害</label>
+                  <input type="range" min="320" max="760" step="10" value=${state.width} onInput=${update("width")} />
+                  <small>${state.width}px</small>
+                </div>
+              </aside>
+
+              <div className="editor-preview">
+                <section
+                  className="editor-preview__hero"
+                  style=${{
+                    "--preview-primary": state.accent,
+                    "--preview-secondary": state.secondary,
+                  }}
+                >
+                  <div className="editor-shell__eyebrow">Live Preview</div>
+                  <h2 className="editor-preview__title" style=${{ maxWidth: `${state.width}px` }}>
+                    ${state.title}
+                  </h2>
+                  <p className="editor-preview__lead">${state.subtitle}</p>
+                  <div className="editor-preview__chips">
+                    ${chips.map((chip) => html`<span key=${chip}>${chip}</span>`)}
+                  </div>
+                  <div className="editor-preview__footer">
+                    <a className="hero-button hero-button--primary" href="/">涓婚〉鎸夐挳</a>
+                    <a className="hero-button hero-button--ghost" href="/archives/">褰掓。鎸夐挳</a>
+                  </div>
+                </section>
+
+                <div className="editor-metrics">
+                  <article className="editor-metrics__item">
+                    <small>Pretext 棰勬祴楂樺害</small>
+                    <strong>${metricHeight}px</strong>
+                  </article>
+                  <article className="editor-metrics__item">
+                    <small>Pretext 棰勬祴琛屾暟</small>
+                    <strong>${metricCount}</strong>
+                  </article>
+                  <article className="editor-metrics__item">
+                    <small>棣栬鏂囨湰</small>
+                    <strong>${metricFirstLine}</strong>
+                  </article>
+                </div>
+
+                <div className="editor-card" style=${{ marginTop: "18px" }}>
+                  <div className="editor-shell__eyebrow">Announcement</div>
+                  <p className="hero-showcase__lead">${state.announcement}</p>
+                  <div className="editor-output">${exportBlock}</div>
+                </div>
+              </div>
+            </section>
+          </div>
+        `;
+      }
+
+      createRoot(document.getElementById("editor-root")).render(html`<${App} />`);
+    </script>
+  </body>
+</html>
+
